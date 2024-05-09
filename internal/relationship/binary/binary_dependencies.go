@@ -92,7 +92,7 @@ func compareElfBinaryPackages(resolver file.Resolver, s *sbom.SBOM) []artifact.I
 					if pathPkg.Type != pkg.BinaryPkg {
 						continue
 					}
-					if _, ok := pathPkg.Metadata.(pkg.ELFBinaryPackageNoteJSONPayload); !ok {
+					if _, ok := pathPkg.Metadata.(pkg.ELFBinaryPackageNoteJSONPayload); !ok && pathPkg.ID() != p.ID() {
 						pkgsToDelete = append(pkgsToDelete, pathPkg.ID())
 					}
 				}

@@ -63,6 +63,18 @@ func TestPackagesToRemove(t *testing.T) {
 	}
 	glibCBinaryClassifierPackage.SetID()
 
+	libCBinaryClassifierPackage := pkg.Package{
+		Name:    "libc",
+		Version: "",
+		Locations: file.NewLocationSet(
+			file.NewLocation(glibcCoordinate.RealPath).WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation),
+		),
+		Language: "",
+		Type:     pkg.BinaryPkg,
+		Metadata: pkg.BinarySignature{},
+	}
+	libCBinaryClassifierPackage.SetID()
+
 	tests := []struct {
 		name     string
 		resolver file.Resolver
@@ -82,10 +94,28 @@ func TestPackagesToRemove(t *testing.T) {
 			want:     []artifact.ID{},
 		},
 		{
+			name:     "remove no packages when there is a single non elf binary package",
+			resolver: file.NewMockResolverForPaths(glibcCoordinate.RealPath),
+			accessor: newAccesor([]pkg.Package{glibCBinaryClassifierPackage}, map[file.Coordinates]file.Executable{}, nil),
+			want:     []artifact.ID{},
+		},
+		{
 			name:     "remove packages when there is a single binary package and a classifier package",
 			resolver: file.NewMockResolverForPaths(glibcCoordinate.RealPath),
 			accessor: newAccesor([]pkg.Package{glibCBinaryELFPackage, glibCBinaryClassifierPackage}, map[file.Coordinates]file.Executable{}, nil),
 			want:     []artifact.ID{glibCBinaryClassifierPackage.ID()},
+		},
+		{
+			name:     "ensure we're considering ELF packages, not just binary packages (supporting evidence)",
+			resolver: file.NewMockResolverForPaths(glibcCoordinate.RealPath),
+			accessor: newAccesor([]pkg.Package{glibCBinaryClassifierPackage}, map[file.Coordinates]file.Executable{}, nil),
+			want:     []artifact.ID{},
+		},
+		{
+			name:     "ensure we're considering ELF packages, not just binary packages (primary evidence)",
+			resolver: file.NewMockResolverForPaths(glibcCoordinate.RealPath),
+			accessor: newAccesor([]pkg.Package{libCBinaryClassifierPackage}, map[file.Coordinates]file.Executable{}, nil),
+			want:     []artifact.ID{},
 		},
 	}
 	for _, tt := range tests {
