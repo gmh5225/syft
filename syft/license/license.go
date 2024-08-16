@@ -1,4 +1,4 @@
-// package license provides common methods for working with SPDX license data
+// Package license provides common methods for working with SPDX license data
 package license
 
 import (
